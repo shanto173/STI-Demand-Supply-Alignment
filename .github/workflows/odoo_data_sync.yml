@@ -1,0 +1,57 @@
+name: Odoo Data Automation Sync
+
+on:
+  schedule:
+    # Run at 8:00 AM, 10:00 AM, and 12:00 PM (Noon) Bangladesh time (which is 02:00, 04:00, and 06:00 UTC)
+    - cron: '0 2,4,6 * * *'
+  workflow_dispatch: # Allow manual trigger for testing
+
+jobs:
+  run-all-data-scripts:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install requests pandas gspread gspread-dataframe python-dotenv python-dateutil pytz openpyxl
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+
+      - name: Decode GCP Credentials from Base64
+        # We decode the base64 string back into the actual JSON file
+        run: |
+          echo "${{ secrets.GCP_CREDENTIALS_B64 }}" | base64 --decode > rugged-feat-456510-q7-381d4ee0fb45.json
+
+      - name: Configure .env variables
+        env:
+          TODO_URL: ${{ secrets.ODOO_URL }}
+          TODO_DB: ${{ secrets.ODOO_DB }}
+          TODO_USERNAME: ${{ secrets.ODOO_USERNAME }}
+          TODO_PASSWORD: ${{ secrets.ODOO_PASSWORD }}
+        run: |
+          echo "ODOO_URL=${TODO_URL}" >> .env
+          echo "ODOO_DB=${TODO_DB}" >> .env
+          echo "ODOO_USERNAME=${TODO_USERNAME}" >> .env
+          echo "ODOO_PASSWORD=${TODO_PASSWORD}" >> .env
+
+      - name: 1. Run Forecast Data
+        run: python forecast_data.py
+
+      - name: 2. Run Current Pending OA
+        run: python running_Pending_order.py
+
+      - name: 3. Run Pending PI
+        run: python pending_Pi.py
+
+      - name: 4. Run Pending Slider Month Closing
+        # This script natively checks if it is the 1st of the month, 
+        # and gracefully calls sys.exit(0) if it isn't, so the pipeline will NOT fail.
+        run: python pending_slider_month_closing.py
