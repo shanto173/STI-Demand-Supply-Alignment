@@ -25,10 +25,11 @@ jobs:
           pip install requests pandas gspread gspread-dataframe python-dotenv python-dateutil pytz openpyxl
           if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
 
-      - name: Decode GCP Credentials from Base64
-        # We decode the base64 string back into the actual JSON file
+      - name: Create credentials file from secret
         run: |
-          echo "${{ secrets.GCP_CREDENTIALS_B64 }}" | base64 --decode > rugged-feat-456510-q7-381d4ee0fb45.json
+          cat << 'EOF' > rugged-feat-456510-q7-381d4ee0fb45.json
+          ${{ secrets.GCP_CREDENTIALS_JSON }}
+          EOF
 
       - name: Configure .env variables
         env:
