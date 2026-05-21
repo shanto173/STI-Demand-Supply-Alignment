@@ -52,7 +52,10 @@ jobs:
       - name: 3. Run Pending PI
         run: python pending_Pi.py
 
-      - name: 4. Run Pending Slider Month Closing
+      - name: 4. Run Pending PI Data (snapshot + day-wise)
+        run: python pending_pi_data.py
+
+      - name: 5. Run Pending Slider Month Closing
         # This script natively checks if it is the 1st of the month, 
         # and gracefully calls sys.exit(0) if it isn't, so the pipeline will NOT fail.
         run: python pending_slider_month_closing.py
