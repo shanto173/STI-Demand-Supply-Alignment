@@ -129,17 +129,22 @@ def get_or_create_worksheet(sheet, name, rows=2000, cols=30):
 
 
 def upload_snapshot(sheet, df, today_str):
-    """Sheet 1: clear and replace with latest snapshot."""
-    worksheet = get_or_create_worksheet(sheet, SNAPSHOT_SHEET)
-    log.info(f"Clearing old data on '{SNAPSHOT_SHEET}'...")
-    worksheet.clear()
+    """Sheet 1: clear and replace with latest snapshot.
 
-    log.info(f"Pasting {len(df)} rows into '{SNAPSHOT_SHEET}'...")
-    set_with_dataframe(worksheet, df, include_index=False, include_column_header=True)
+    Row 1 is reserved for user-maintained subtotal formulas, so data is
+    written starting at A2 (header on row 2, rows from row 3 onward) and
+    row 1 is left untouched.
+    """
+    worksheet = get_or_create_worksheet(sheet, SNAPSHOT_SHEET)
+    log.info(f"Clearing old data on '{SNAPSHOT_SHEET}' from row 2 down (row 1 preserved)...")
+    worksheet.batch_clear(["A2:ZZ"])
+
+    log.info(f"Pasting {len(df)} rows into '{SNAPSHOT_SHEET}' starting at A2...")
+    set_with_dataframe(worksheet, df, include_index=False, include_column_header=True, row=2, col=1)
 
     now_str = datetime.now(DHAKA_TZ).strftime("%Y-%m-%d %I:%M %p")
     timestamp_col = chr(ord('A') + len(df.columns))  # column right after data
-    worksheet.update_acell(f"{timestamp_col}1", f"Updated: {now_str}")
+    worksheet.update_acell(f"{timestamp_col}2", f"Updated: {now_str}")
     log.info(f"✅ '{SNAPSHOT_SHEET}' updated at {now_str}")
 
 
