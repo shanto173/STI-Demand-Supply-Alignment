@@ -22,8 +22,8 @@ log = logging.getLogger()
 load_dotenv()
 ODOO_URL = os.getenv("ODOO_URL")
 DB = os.getenv("ODOO_DB")
-USERNAME = os.getenv("ODOO_USERNAME", "supply.chain3@texzipperbd.com")
-PASSWORD = os.getenv("ODOO_PASSWORD", "@Shanto@86")
+USERNAME = os.getenv("ODOO_USERNAME", "")
+PASSWORD = os.getenv("ODOO_PASSWORD", "")
 
 # Google Sheets info - Replace with your actual IDs
 SPREADSHEET_ID = "1PECBN0MiOpOeVa3XvSpit5Xb5fLT91HxbXNvEUpbqM8" # Update if needed
