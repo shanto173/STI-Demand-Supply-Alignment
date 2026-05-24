@@ -173,6 +173,8 @@ def upload_daywise(sheet, df, today_str):
         existing = existing.dropna(how='all')
         # Drop fully empty columns (gspread_dataframe sometimes adds trailing NaN cols)
         existing = existing.loc[:, ~existing.columns.astype(str).str.startswith("Unnamed")]
+        # Drop any leftover "Updated: ..." timestamp columns from older runs
+        existing = existing.loc[:, ~existing.columns.astype(str).str.startswith("Updated")]
         existing = existing.fillna("")
 
         if "Date" in existing.columns:
@@ -196,11 +198,7 @@ def upload_daywise(sheet, df, today_str):
     log.info(f"Writing {len(combined)} total rows ({len(today_df)} for {today_str}) to '{DAYWISE_SHEET}'...")
     worksheet.clear()
     set_with_dataframe(worksheet, combined, include_index=False, include_column_header=True)
-
-    now_str = datetime.now(DHAKA_TZ).strftime("%Y-%m-%d %I:%M %p")
-    timestamp_col = chr(ord('A') + len(combined.columns))
-    worksheet.update_acell(f"{timestamp_col}1", f"Updated: {now_str}")
-    log.info(f"✅ '{DAYWISE_SHEET}' updated at {now_str}")
+    log.info(f"✅ '{DAYWISE_SHEET}' updated.")
 
 
 def upload_to_google_sheets(excel_content):
